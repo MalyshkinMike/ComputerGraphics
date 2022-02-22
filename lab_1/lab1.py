@@ -146,17 +146,16 @@ class ObjParsed:
         string_obj = obj.read()
         dot_lines = [x for x in string_obj.split('\n') if 'v ' in x]
         f_lines = [f for f in string_obj.split('\n') if 'f ' in f]
-        for line in dot_lines: # saving dots
+        for line in dot_lines:  # saving dots
             splitted = line.split()
             dot = [float(splitted[1]), float(splitted[2]), float(splitted[3])]
             self.dots_arr.append(dot)
-        for line in f_lines: # saving lines
+        for line in f_lines:  # saving lines
             splitted = line.split()
             poly = []
-            for i in (1, len(splitted) -1 ):
-                poly.append(int(splitted[i].split('/')[0]))
+            for i in range(1, len(splitted)):
+                poly.append(int(splitted[i].split('/')[0])) # detecting from where to where should the line go
             self.polygons.append(poly)
-
 
     def task5(self):
         img_array = np.zeros((1000, 1000, 3), dtype=np.uint8)
@@ -172,23 +171,24 @@ class ObjParsed:
 
     def task7(self):
         image = MyImage()
-        image.arr_init(1000,1000)
+        image.arr_init(1000, 1000)  # initiating a raw 1000x1000 MyImage
         for poly in self.polygons:
-            for i in range(1, len(poly)):
-                start_dot_with_z = self.dots_arr[poly[i-1] - 1]
-                end_dot_with_z = self.dots_arr[poly[i] - 1]
-                start_dot = (start_dot_with_z[0] * 50 + 500, -(start_dot_with_z[1] * 50 + 500))
+            for i in range(-1, len(
+                    poly) -1 ):  # looking trough coordinates of dots to connect
+                start_dot_with_z = self.dots_arr[poly[i] - 1]
+                end_dot_with_z = self.dots_arr[poly[i + 1] - 1]
+                start_dot = (
+                start_dot_with_z[0] * 50 + 500, -(start_dot_with_z[1] * 50 + 500))  # coordinates converting
                 end_dot = (end_dot_with_z[0] * 50 + 500, -(end_dot_with_z[1] * 50 + 500))
-                if start_dot == end_dot:
-                    continue
-                image.draw_line_brezenhem(start_dot, end_dot, (255,255,255))
-        image.show()
-        image.save('helmet2.png', srgb = 3)
+                if start_dot == end_dot:  # in this model some 'lines' can have the same x and y for start and end point (but different z)
+                    continue  # brezenhem would fail to draw this line. By the way, for us it would be seen as a simple dot
+                image.draw_line_brezenhem(start_dot, end_dot,
+                                          (255, 255, 255))  # drawing a line between start and end point
+        image.show()  # showing and saving result
+        image.save('helmet2.png', srgb=3)
 
 
+obj = ObjParsed()  # create a new example of our class
 
-
-obj = ObjParsed()
-
-obj.from_obj_file("StormTrooper.obj")
-obj.task7()
+obj.from_obj_file("StormTrooper.obj")  # reading model
+obj.task7()  # performing task 7
